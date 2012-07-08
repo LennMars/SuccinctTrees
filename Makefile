@@ -11,4 +11,4 @@ src/%.o: src/%.cc
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ -c $<
 
 clean:
-	rm -rf *~ *.out *.o
+	rm -rf *~ *.out src/*.o
