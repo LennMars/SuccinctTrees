@@ -181,21 +181,45 @@ uint suc_tree::fwd_search_inblock(uint i, int d) {
   return UINT_MAX;
 }
 
+bool is_edge_of_tree(int node) {
+  while (node > 0) {
+    if (node % tree_arity == 0) {
+      node = node / tree_arity - 1;
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
 int suc_tree::tree_search(int node, int d) {
   int depth = tree_depth_ - 1;
   while (true) { // upward
-    for (; node % tree_arity != 0 && !nodes_[node].includes(d); ++node);
-    if (node % tree_arity == 0 && !nodes_[node].includes(d)) {
-      node /= tree_arity;
-      --depth;
-      if (depth < 0) return -1;
-      dbg("up node, depth : %d, %d\n", node, depth);
-    } else {
-      break;
+    dbg("node slide : %d -> ", node);
+    while (true) {
+      if (node % tree_arity == 0) {
+        dbg("%d\n", node);
+        if (is_edge_of_tree(node)) {
+          return -1;
+        } else {
+          node /= tree_arity;
+          --depth;
+          dbg("up node, depth : %d, %d\n", node, depth);
+          break;
+        }
+      } else if (nodes_[node].includes(d)) {
+        dbg("%d found\n", node);
+        goto down;
+      } else {
+        ++node;
+      }
     }
   }
+  down:
   while (true) { // downward
-    for (; node % tree_arity != 0 && !nodes_[node].includes(d); ++node);
+    dbg("node slide : %d -> ", node);
+    for (; !nodes_[node].includes(d); ++node);
+    dbg("%d\n", node);
     if (depth == tree_depth_ - 1) {
       return node;
     } else {
