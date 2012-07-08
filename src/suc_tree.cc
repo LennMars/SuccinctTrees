@@ -67,6 +67,19 @@ suc_tree::suc_tree(const bitVector& bv): bv_(bv) {
   }
 }
 
+void suc_tree::print_bits() {
+  for (int b = 0; b < num_blocks_; ++b) {
+    for (int u = 0; u < block_size / lookup_unit_size; ++u) {
+      for (int i = 0; i < lookup_unit_size; ++i) {
+        uint j = block_size * b + lookup_unit_size * u + i;
+        if (j < size_) printf("%d", bv_[j]);
+      }
+      printf(" ");
+    }
+    printf("\n");
+  }
+}
+
 void suc_tree::print_nodes() {
   printf("leaves :\n");
   for (vector<leaf>::iterator it = leaves_.begin(); it != leaves_.end(); ++it) {

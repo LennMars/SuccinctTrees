@@ -68,6 +68,7 @@ class suc_tree {
   int tree_search(int node, int d);
 public:
   suc_tree(const cs::bitVector& bv);
+  void print_bits();
   void print_nodes();
   uint inspect(uint i);
   bool isleaf(uint i);

@@ -56,19 +56,7 @@ void test_correctness(int size, float deepness) {
   cs::bitVector t;
   make_random_tree(size, deepness, t);
   suc_tree tr(t);
-  printf("\n");
-  for(uint i=0;i < size*2; ++i) {
-    printf("%d", t[i] ? 1 : 0);
-  }
-  printf("\n");
-  for(uint i=0; i <= size*2/32; ++i) {
-    uint x = t.getBlock(i);
-    for(int j=0; j < 32; ++j) {
-      if (j != 0 && j % 8 == 0) printf(" ");
-      printf("%d", x >> j & 1);
-    }
-    printf("\n");
-  }
+  tr.print_bits();
   for (uint i = 0; i < size * 2; ++i){
     for (int d = -1; d <= 1; ++d) {
       uint fast = tr.fwd_search(i, d);
