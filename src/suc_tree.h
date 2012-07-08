@@ -21,9 +21,9 @@ using namespace cs;
 using std::vector;
 using std::string;
 
-const int block_size_exp = 5;// 9;
-const int block_size = 1 << block_size_exp; // 512; // s
-const int tree_arity = 3; // 32; // k
+const int block_size_exp = 9;
+const int block_size = 1 << block_size_exp; // s = 512
+const int tree_arity = 32; // k
 const int lookup_unit_size = 8;
 const int bitsize = 32;
 
