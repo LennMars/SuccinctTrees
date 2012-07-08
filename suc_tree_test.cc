@@ -52,25 +52,45 @@ int test1() {
   return 0;
 }
 
-void test_correctness(int size, float deepness) {
+void test_correctness(int size, float deepness, int index, int diff) {
   cs::bitVector t;
   make_random_tree(size, deepness, t);
   suc_tree tr(t);
+  tr.print_nodes();
   tr.print_bits();
-  for (uint i = 0; i < size * 2; ++i){
-    for (int d = -1; d <= 1; ++d) {
-      uint fast = tr.fwd_search(i, d);
-      uint naive = tr.fwd_search_naive(i, d);
-      if (fast != naive) {
-        printf("i, d : %d, %d\n", i, d);
-        printf("diff : %d, %d\n", fast, naive);
+  if (index < 0) {
+    for (uint i = 0; i < size * 2; ++i){
+      for (int d = -1; d <= 1; ++d) {
+        uint fast = tr.fwd_search(i, d);
+        uint naive = tr.fwd_search_naive(i, d);
+        if (fast != naive) {
+          printf("i, d : %d, %d\n", i, d);
+          printf("fast, naive : %d, %d\n", fast, naive);
+        }
       }
     }
+  } else {
+    printf("i, d : %d, %d\n", index, diff);
+    uint fast = tr.fwd_search(index, diff);
+    uint naive = tr.fwd_search_naive(index, diff);
+    printf("fast, naive : %d, %d\n", fast, naive);
   }
 }
 
 int main(int argc, char* argv[]) {
 //   test1();
-  test_correctness(10000, 0.5);
+  int size = 100;
+  float deepness = 0.5;
+  int index = -1;
+  int diff = 0;
+  if (argc > 2) {
+    size = atoi(argv[1]);
+    deepness = atof(argv[2]);
+  }
+  if (argc > 4) {
+    index = atoi(argv[3]);
+    diff = atoi(argv[4]);
+  }
+  test_correctness(size, deepness, index, diff);
   return 0;
 }
