@@ -161,7 +161,8 @@ uint suc_tree::fwd_search_inblock(uint i, int d) {
   d -= sum;
 
   // unit main
-  for (uint b = bits_index; b <= bits_index || b * bitsize < block_size; ++b) {
+  uint b_end = (bits_index / (block_size / bitsize) + 1) * (block_size / bitsize);
+  for (uint b = bits_index; b == bits_index || b < b_end; ++b) {
     bits = bv_.getBlock(b);
     dbg("b_ind, bits : %d, %s\n", b, bits_to_string(bits, bitsize).c_str());
     for (int u = (b == bits_index) ? unit : 0; u < bitsize / lookup_unit_size; ++u) {
@@ -214,6 +215,7 @@ uint suc_tree::fwd_search(uint i, int d) {
   dbg("phase1\n");
   uint ret = fwd_search_inblock(i, d);
   if (ret != UINT_MAX) return ret;
+  if (size_ < block_size) return UINT_MAX;
 
   // in leaves search
   dbg("phase2\n");
