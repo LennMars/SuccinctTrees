@@ -3,7 +3,9 @@ CFLAGS=-Isrc
 INCLUDES=
 
 ifdef debug
- CFLAGS += -DDEBUG
+ CFLAGS += -DDEBUG -g -O0
+else
+ CFLAGS += -O2
 endif
 
 .PHONY: all clean
