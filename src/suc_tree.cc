@@ -23,6 +23,7 @@ suc_tree::suc_tree(const bitVector& bv): bv_(bv) {
     int local = prev;
     int local_min = prev + 1;
     int local_max = prev - 1;
+    dbg("excess : ")
     for (int i = b * block_size; (i < (b + 1) * block_size) && (i < size_); ++i) {
       local += (bv[i] == 0) ? -1 : 1;
       excess[i] = local;
@@ -30,6 +31,7 @@ suc_tree::suc_tree(const bitVector& bv): bv_(bv) {
       local_max = max(local_max, local);
       dbg("%d ", excess[i]);
     }
+    dbg("\n");
     leaves_[b] = leaf(prev, local_min, local_max);
     prev = local;
   }
@@ -107,9 +109,9 @@ int suc_tree::block_sum(uint i, uint j) {
   return x;
 }
 
-string bits_to_string(uint i) {
+string bits_to_string(uint i, int width) {
   std::string str;
-  for (int j = 0; j < lookup_unit_size; ++j) {
+  for (int j = 0; j < width; ++j) {
     str += (i & 1) ? "1" : "0";
     i = i >> 1;
   }
@@ -144,7 +146,8 @@ uint suc_tree::fwd_search_inblock(uint i, int d) {
   uint bits_rem = i % bitsize;
   uint bits = bv_.getBlock(bits_index);
   int unit = bits_rem / lookup_unit_size + 1;
-  dbg("b_ind, b_rem, bits, unit : %d, %d, %s, %d\n", bits_index, bits_rem, bits_to_string(bits).c_str(), unit);
+  dbg("fwd_search_inblock. i, d : %d, %d\n", i, d);
+  dbg("b_ind, b_rem, bits, unit : %d, %d, %s, %d\n", bits_index, bits_rem, bits_to_string(bits, bitsize).c_str(), unit);
   // in unit remain
   int sum = 0;
   for (uint j = bits_rem; j < unit * lookup_unit_size; ++j) {
@@ -160,8 +163,10 @@ uint suc_tree::fwd_search_inblock(uint i, int d) {
   // unit main
   for (uint b = bits_index; b <= bits_index || b * bitsize < block_size; ++b) {
     bits = bv_.getBlock(b);
+    dbg("b_ind, bits : %d, %s\n", b, bits_to_string(bits, bitsize).c_str());
     for (int u = (b == bits_index) ? unit : 0; u < bitsize / lookup_unit_size; ++u) {
       int res = fwd_lookup(bits >> (u * lookup_unit_size) & 0xff, d);
+      dbg("u, query, res : %d, (%s, %d), %s\n", u, bits_to_string(bits >> (u * lookup_unit_size) & 0xff, lookup_unit_size).c_str(), d, bits_to_string(res, lookup_unit_size).c_str());
       if (res & 1) {
         uint ret =  b * bitsize + u * lookup_unit_size + (res >> 1 & 0x7);
         return (ret < size_) ? ret : UINT_MAX;
@@ -205,6 +210,7 @@ uint suc_tree::fwd_search(uint i, int d) {
   int start_block = i / block_size;
   uint edge_index = (start_block + 1) * block_size - 1;
   // in block search
+  dbg("i, start_block, edge_index : %d, %d, %d\n", i, start_block, edge_index);
   dbg("phase1\n");
   uint ret = fwd_search_inblock(i, d);
   if (ret != UINT_MAX) return ret;
@@ -214,7 +220,9 @@ uint suc_tree::fwd_search(uint i, int d) {
   int edge_block = (start_block / tree_arity + 1) * tree_arity - 1;
   int new_d = d + leaves_[start_block + 1].get_offset() - block_sum(i, edge_index);
   dbg("edge_block, new_d : %d, %d\n", edge_block, new_d);
+  dbg("%d, %d, %d\n", d, leaves_[start_block + 1].get_offset(), block_sum(i, edge_index))
   for (int b = start_block + 1; b <= edge_block; ++b) {
+    dbg("b : %d\n", b);
     if (leaves_[b].includes(new_d)) return fwd_search_inblock(b * block_size, new_d - leaves_[b].get_offset());
   }
   // tree search
@@ -223,7 +231,7 @@ uint suc_tree::fwd_search(uint i, int d) {
   int tree_search_return = tree_search(start_node, new_d);
   if (tree_search_return == -1) return UINT_MAX;
   int block = tree_search_return * tree_arity + 1 - num_nodes_;
-  dbg("start_node, block : %d, %d\n", start_node, block);
+  dbg("tree_search, start_node, block : %d, %d, %d\n", tree_search_return, start_node, block);
   for (int b = block; b < block + tree_arity; ++b) {
     if (leaves_[b].includes(new_d)) return fwd_search_inblock(b * block_size, new_d - leaves_[b].get_offset());
   }
