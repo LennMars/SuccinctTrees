@@ -2,6 +2,10 @@ CC=g++
 CFLAGS=-Isrc
 INCLUDES=
 
+ifdef debug
+ CFLAGS += -DDEBUG
+endif
+
 .PHONY: all clean
 
 all: suc_tree_test.cc src/suc_tree.o
